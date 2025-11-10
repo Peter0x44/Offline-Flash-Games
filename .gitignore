@@ -65,6 +65,7 @@ flash/player/
 
 # Releases
 release-builds/
+out/
 
 # Visual Studio
 */_notes/

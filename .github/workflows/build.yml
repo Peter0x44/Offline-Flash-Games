@@ -1,0 +1,133 @@
+name: Build/release
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - 'v*'
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        os: [macos-latest, ubuntu-latest, windows-latest]
+
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@v4
+
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Package app (Windows - build all architectures)
+        if: matrix.os == 'windows-latest'
+        run: |
+          npm run package -- --arch=x64
+          npm run package -- --arch=ia32
+          npm run package -- --arch=arm64
+
+      - name: Package app (macOS - build all architectures)
+        if: matrix.os == 'macos-latest'
+        run: |
+          npm run package -- --arch=x64
+          npm run package -- --arch=arm64
+
+      - name: Package app (Linux - build all architectures)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          npm run package -- --arch=x64
+          npm run package -- --arch=ia32
+          npm run package -- --arch=arm64
+          npm run package -- --arch=armv7l
+
+      - name: Upload artifacts (Windows x64)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Steve's Offline Flash Games-win32-x64
+          path: out/Steve's Offline Flash Games-win32-x64/
+
+      - name: Upload artifacts (Windows ia32)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Steve's Offline Flash Games-win32-ia32
+          path: out/Steve's Offline Flash Games-win32-ia32/
+
+      - name: Upload artifacts (Windows arm64)
+        if: matrix.os == 'windows-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Steve's Offline Flash Games-win32-arm64
+          path: out/Steve's Offline Flash Games-win32-arm64/
+
+      - name: Upload artifacts (macOS x64)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Steve's Offline Flash Games-darwin-x64
+          path: out/Steve's Offline Flash Games-darwin-x64/
+
+      - name: Upload artifacts (macOS arm64)
+        if: matrix.os == 'macos-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Steve's Offline Flash Games-darwin-arm64
+          path: out/Steve's Offline Flash Games-darwin-arm64/
+
+      - name: Upload artifacts (Linux x64)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Steve's Offline Flash Games-linux-x64
+          path: out/Steve's Offline Flash Games-linux-x64/
+
+      - name: Upload artifacts (Linux ia32)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Steve's Offline Flash Games-linux-ia32
+          path: out/Steve's Offline Flash Games-linux-ia32/
+
+      - name: Upload artifacts (Linux arm64)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Steve's Offline Flash Games-linux-arm64
+          path: out/Steve's Offline Flash Games-linux-arm64/
+
+      - name: Upload artifacts (Linux armv7l)
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: Steve's Offline Flash Games-linux-armv7l
+          path: out/Steve's Offline Flash Games-linux-armv7l/
+
+      - name: Create release zips
+        if: startsWith(github.ref, 'refs/tags/')
+        run: |
+          mkdir -p release-zips
+          cd out
+          for dir in Steve's\ Offline\ Flash\ Games-*/; do
+            zipname="../release-zips/$(basename "$dir").zip"
+            cd "$dir" && zip -r "$zipname" . && cd ..
+          done
+        shell: bash
+
+      - name: Release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v1
+        with:
+          files: release-zips/*.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

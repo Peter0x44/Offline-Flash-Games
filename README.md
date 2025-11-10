@@ -1,6 +1,8 @@
 # Steve's Offline Flash Games
 Offline Flash Games that can work offline and never be blocked, for use during those boring times at school or work but also useful for times where there is no internet.
 View the [Online Demo](https://steve-tech.github.io/Offline-Flash-Games/index.html).
+
+**Note:** This repository now uses [Ruffle](https://ruffle.rs/), a Flash Player emulator written in Rust, which allows these games to run in modern browsers without requiring the deprecated Adobe Flash Player plugin.
 ## Games
  - 2048
  - Chess 3
@@ -14,22 +16,24 @@ View the [Online Demo](https://steve-tech.github.io/Offline-Flash-Games/index.ht
  - Tetris
  - Fireboy and Watergirl in The Crystal Temple, Forest Temple, Ice Temple & Light Temple (These haven't been tested properly yet)
 
+## Running the Games
+
+### Web Browser (Recommended)
+Simply visit any of the HTML files in a modern web browser (Chrome, Firefox, Edge, Safari, etc.). The games will automatically load using Ruffle.
+
+To host with a web server:
+```bash
+python -m http.server 8000
+```
+
+### Standalone Electron App
+Download the portable zip from the releases page, or build it yourself:
+```bash
+npm install
+npm run package
+```
+
+The application will be created in the `out/` directory.
+
 ## Download
 View the [releases here](https://github.com/Steve-Tech/Offline-Flash-Games/releases).
-There is no Mac version because I don't have a Mac so I can't test or get the files needed to compile, you will have to run the HTML version or compile Electron for yourself, feel free to fork this and make a Mac version.
-## Compiling
-1. Install Node.js, electron and electron-packager
- - [Download Node.js here](https://nodejs.org/en/)
- - Open command prompt in the directory of the repository and run `npm install electron --save-dev`
- - In the same command prompt run `npm install electron-packager --save-dev`
-2. You will need to find the Pepper Flash Player files
- - Windows 64 bit: `C:\Windows\System32\Macromed\Flash\pepflashplayer64_<version>.dll`
- - Windows 32 bit: `C:\Windows\SysWOW64\Macromed\Flash\pepflashplayer32_<version>.dll`
- - Mac: `/Library/Internet Plug-Ins/Flash Player.plugin`
-3. Put them in the `flash/player` directory
-
-4. In the command prompt from earlier, run ```electron-packager . offline-flash-games --overwrite --platform=win32 --arch=ia32 --prune=true --out=release-builds --version-string.FileDescription="Steve's Offline Collection of Flash Player Games" --version-string.ProductName="Steve's Offline Flash Games"```
-    
-Notes:
- - ASAR does not work with Flash
- - You may want to go into `main.js` to find `'\\flash\\pepflashplayer32.dll'` and change the 32 to 64 if using different versions of electron
