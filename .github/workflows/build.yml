@@ -113,21 +113,30 @@ jobs:
           name: Steve's Offline Flash Games-linux-armv7l
           path: out/Steve's Offline Flash Games-linux-armv7l/
 
-      - name: Create release zips
-        if: startsWith(github.ref, 'refs/tags/')
+      - name: Create release zip (Windows)
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os == 'windows-latest'
         run: |
-          mkdir -p release-zips
           cd out
-          for dir in Steve's\ Offline\ Flash\ Games-*/; do
-            zipname="../release-zips/$(basename "$dir").zip"
-            cd "$dir" && zip -r "$zipname" . && cd ..
+          Get-ChildItem -Directory -Filter "Steve's Offline Flash Games-*" | ForEach-Object {
+            $zipname = "$($_.Name).zip"
+            Compress-Archive -Path "$($_.FullName)\*" -DestinationPath $zipname -Force
+          }
+        shell: pwsh
+
+      - name: Create release zip (Unix)
+        if: startsWith(github.ref, 'refs/tags/') && matrix.os != 'windows-latest'
+        run: |
+          cd out
+          for dir in Steve\'s\ Offline\ Flash\ Games-*/; do
+            zipname="$(basename "$dir").zip"
+            (cd "$dir" && zip -r "../$zipname" .)
           done
         shell: bash
 
-      - name: Release
+      - name: Upload release zips
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v1
         with:
-          files: release-zips/*.zip
+          files: out/*.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
