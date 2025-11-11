@@ -118,7 +118,7 @@ jobs:
         run: |
           mkdir -p release-zips
           cd out
-          for dir in Steve's\ Offline\ Flash\ Games-*/; do
+          for dir in Steve\'s\ Offline\ Flash\ Games-*/; do
             zipname="../release-zips/$(basename "$dir").zip"
             cd "$dir" && zip -r "$zipname" . && cd ..
           done
